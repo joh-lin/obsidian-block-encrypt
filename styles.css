@@ -1,8 +1,198 @@
-/*
+/* class structure:
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+jojo-encrypt-container
+  login-container
+    error-text
+    password-hint
+    password-input
+      div
+      input
+    decrypt-button
 
-If your plugin does not need CSS, delete this file.
+  main-text-area
+  save-button
+    svg
 
+jojo-generator-container
+  password-input
+    div
+    input
+  password-input
+    div
+    input
+  hint-input
+    div
+    input
+  error-text
+  generate-button
+
+  read-mode-title
+  read-mode-div
+  
 */
+
+/* Encrypt Block Main */
+.jojo-encrypt-container {
+  border: var(--border-width) solid var(--background-secondary-alt);
+  border-radius: var(--radius-s);
+  padding: var(--size-4-1);
+}
+
+.jojo-encrypt-container button.save-button {
+  position: absolute;
+  bottom: var(--size-4-1);
+  right: var(--size-4-1);
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+  background-color: var(--interactive-normal);
+}
+
+.jojo-encrypt-container button.save-button.unsaved-changes {
+  color: var(--color-red);
+}
+
+.jojo-encrypt-container button.save-button:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-normal);
+}
+
+.jojo-encrypt-container textarea {
+  resize: none;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  background-color: transparent;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  font-size: var(--font-text-size);
+}
+
+.jojo-encrypt-container textarea:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.jojo-encrypt-container .login-container {
+  padding: 0px;
+  margin: 0px;
+}
+
+/* Login Block Main */
+.jojo-encrypt-container .login-container .error-text {
+  color: var(--text-error);
+  margin: var(--size-4-1) var(--size-4-1);
+}
+
+.jojo-encrypt-container .login-container .password-hint {
+  background-color: var(--background-primary-alt);
+  border-radius: var(--radius-s);
+  padding: var(--size-4-1) var(--size-4-1);
+}
+
+.jojo-encrypt-container .login-container .password-input {
+  margin: 0px var(--size-4-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-1) var(--size-4-2);
+}
+
+.jojo-encrypt-container .login-container .password-input input {
+  margin: var(--size-4-1) 0px;
+  height: calc(var(--font-text-size) * 1.9);
+}
+
+.jojo-encrypt-container .login-container .password-input div {
+  width: calc(var(--font-text-size) * 10);
+}
+
+.jojo-encrypt-container .login-container .decrypt-button {
+  margin: var(--size-4-1) var(--size-4-1);
+  font-size: var(--font-text-size);
+  height: calc(var(--font-text-size) * 1.7);
+  width: calc(var(--font-text-size) * 5.5);
+}
+
+
+/* Generator Block */
+.jojo-generator-container .read-mode-title {
+  font-size: var(--h4-size);
+  width: 100%;
+  text-align: center;
+}
+
+.jojo-generator-container .read-mode-div {
+  width: 100%;
+  text-align: center;
+}
+
+.jojo-generator-container {
+  border: var(--border-width) solid var(--background-secondary-alt);
+  border-radius: var(--radius-s);
+  padding: var(--size-4-1);
+}
+
+.jojo-generator-container .password-input {
+  margin: var(--size-4-1) var(--size-4-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-1) var(--size-4-2);
+}
+
+.jojo-generator-container .password-input div {
+  width: calc(var(--font-text-size) * 10);
+}
+
+.jojo-generator-container .password-input input {
+  height: calc(var(--font-text-size) * 1.9);
+}
+
+.jojo-generator-container .hint-input {
+  margin: var(--size-4-1) var(--size-4-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-1) var(--size-4-2);
+}
+
+.jojo-generator-container .hint-input div {
+  width: calc(var(--font-text-size) * 10);
+}
+
+.jojo-generator-container .hint-input input {
+  height: calc(var(--font-text-size) * 1.9);
+}
+
+.jojo-generator-container .error-text {
+  margin: var(--size-4-1) var(--size-4-1);
+  color: var(--text-error);
+}
+
+.jojo-generator-container .generate-button {
+  margin: var(--size-4-1) var(--size-4-1);
+  background-color: var(--interactive-normal);
+  font-size: var(--font-text-size);
+  height: calc(var(--font-text-size) * 1.7);
+  width: calc(var(--font-text-size) * 6);
+}
+
+
+/* Disable "Edit Block" Button */
+.markdown-source-view.mod-cm6 div.block-language-encrypt ~ div.edit-block-button,
+.markdown-source-view.mod-cm6 div.block-language-encryptgenerator ~ div.edit-block-button {
+  display: none;
+}
+
+
+/* MOBILE */
+.is-mobile .jojo-generator-container .hint-input input {
+  width: auto;
+  margin: 0px;
+  padding: var(--size-4-1) var(--size-4-2);
+}
