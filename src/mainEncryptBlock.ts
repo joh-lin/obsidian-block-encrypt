@@ -1,6 +1,6 @@
 import { ENCRYPT_BLOCK_IDENTIFIER, strings } from "./constants";
-import { createInputField, decryptText, encryptText, isMarkdownViewSoureMode } from "./utils";
-import { MarkdownPostProcessorContext, MarkdownView, Editor, setIcon } from "obsidian";
+import { DecryptionResult, ViewMode, createInputField, decryptText, determineViewMode, encryptText, isMarkdownViewSoureMode } from "./utils";
+import { MarkdownPostProcessorContext, MarkdownView, Editor, setIcon, View } from "obsidian";
 import { EditorView } from "@codemirror/view"
 
 export class MainEncryptBlock {
@@ -13,67 +13,84 @@ export class MainEncryptBlock {
 
   constructor(readonly blockID: string) {}
 
-  process(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
-    const markdownView = app.workspace.getActiveViewOfType(MarkdownView)
-    // if markdownView is not available yet, wait for obsidian to completely load
-    // and then execute render code
-    if (!markdownView) {
-      const ref = app.workspace.on("layout-change", () => {
-        this.process(source, container, ctx);
-        app.workspace.offref(ref);
-      })
-      return;
-    }
-    const editor = markdownView.editor;
-    const isSourceMode = isMarkdownViewSoureMode(markdownView);
+  onLayoutReady(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    const recLeaf = app.workspace.getMostRecentLeaf();
+    if (!recLeaf) throw "getMostRecentLeaf() failed in mainEncryptBlock.process!";
 
-    // read block data
-    const splitText = source.split('\n');
-    this.passwordHint = splitText[1]//.slice(6);
-    this.encryptedText = splitText[2];
-
-    // lable container
-		container.classList.add("jojo-encrypt-container");
-
-    /* 
-    IF password correct:
-      Show decrypted text
-        IF source mode:
-          Show Save Button
-          Text editable
-    ELSE IF password wrong or not entered
-      Show login view
-
-
-    encryptedText, container, isSourceMode, ctx, passwordHint
-
-    editor is in 
-    markdownfileinfo, markdownview, markdowneditview, markdownsourceview
-    */
-
+      
     const renderInfo = {
-      ctx: ctx,
+      source: source,
       container: container,
-      editor: editor,
-      isSourceMode: isSourceMode,
-      markdownView: markdownView,
+      ctx: ctx,
+      viewMode: determineViewMode(container, recLeaf.view),
+      view: recLeaf.view,
     }
 
-    this.renderBlock(renderInfo)
-    
+    this.renderBlock(renderInfo);
+
+    // register for "updateAllViews()"
     this.updateEventRegister[ctx.docId] = renderInfo
-    markdownView.register(() => {
+    renderInfo.view.register(() => {
       delete this.updateEventRegister[ctx.docId];
     })
   }
 
-  renderBlock(info: RenderInformation) {
-    try {
-      const decryptedText = decryptText(this.encryptedText, this.password)
 
+  process(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
+    // execute the render code when DOM is fully loaded
+    // otherwise parents, markdownView and editor might
+    // not be accessible
+    if (app.workspace.layoutReady) {
+      this.onLayoutReady(source, container, ctx);
+    } else {
+      app.workspace.onLayoutReady(() => {
+        this.onLayoutReady(source, container, ctx);
+      })
+    }
+  }
+
+  renderBlock(info: RenderInformation) {
+    info.viewMode = determineViewMode(info.container, info.view);
+
+    if (info.viewMode === "undetermined") {
+      new MutationObserver((mutations, observer) => {
+        this.renderBlock(info);
+        observer.disconnect();
+      }).observe(info.view.containerEl, {subtree: true, childList: true, attributes: true});
+      return;
+    }
+    
+    // first clear all previous content
+    info.container.innerHTML = "";
+
+    info.container.createDiv("debug-tag-corner").textContent = info.viewMode;
+
+    // read block data
+    const splitText = info.source.split('\n');
+    this.passwordHint = splitText[1]//.slice(6);
+    this.encryptedText = splitText[2];
+
+    // lable container
+		info.container.classList.add("block-encrypt-container");
+
+    
+    // render the actual content
+    let decResult: DecryptionResult;
+    try {
+      decResult = decryptText(this.encryptedText, this.password)
+    } catch {
+      decResult = {status:"failed", text:"error-incorrect-password"};
+    }
+    let decryptionSuccessful = decResult.status === "success";
+    if (decryptionSuccessful) {
       // DISPLAY DECRYPTED TEXT
       const mainTextArea = info.container.createEl("textarea", "main-text-area");
-      mainTextArea.value = decryptedText;
+      mainTextArea.value = decResult.text;
+      mainTextArea.disabled = info.viewMode !== "source";
+
+      // this text is used by the resizeObserver to detect font size change
+      const invisText = info.container.createDiv("invisible-workaround-text");
+      invisText.textContent = "A";
 
       // resize textarea on input
       // TODO: this is very uggly and a bad way
@@ -85,14 +102,23 @@ export class MainEncryptBlock {
       mainTextArea.addEventListener("input", (e) => { updateHeight() })
       new ResizeObserver((entries) => {
         updateHeight();
-      }).observe(info.markdownView.contentEl.getElementsByClassName("cm-sizer")[0])
+      }).observe(invisText)
       updateHeight()
 
       // ^^^ bad
 
 
-      if (info.isSourceMode) {
-        //mainTextArea.contentEditable = "true";
+      if (info.viewMode === "source") {
+        
+        const markdownView = app.workspace.getActiveViewOfType(MarkdownView)
+        if (!markdownView) {
+          new MutationObserver((mutations, observer) => {
+            this.renderBlock(info);
+            observer.disconnect();
+          }).observe(info.view.containerEl, {subtree: true, childList: true, attributes: true});
+          return;
+        }
+        const editor = markdownView.editor;
 
         // save button
         const saveButton = info.container.createEl("button", "save-button");
@@ -105,9 +131,9 @@ export class MainEncryptBlock {
           const sectionInfo = info.ctx.getSectionInfo(info.container);
 
           if (sectionInfo) {
-            info.editor.replaceRange(newEncryptedText, 
+            editor.replaceRange(newEncryptedText, 
               {line: sectionInfo.lineStart+3, ch: 0}, 
-              {line: sectionInfo.lineStart+3, ch: info.editor.getLine(sectionInfo.lineStart+3).length})
+              {line: sectionInfo.lineStart+3, ch: editor.getLine(sectionInfo.lineStart+3).length})
 
           }
 
@@ -120,14 +146,15 @@ export class MainEncryptBlock {
       }
 
 
-    } catch(err) {
+    } else {
 
       // LOGIN WINDOW
 
       const loginContainer = info.container.createDiv("login-container");
       // error display div
       const errorDiv = loginContainer.createDiv("error-text");
-      errorDiv.textContent = (err in strings) ? (strings as any)[err] : err;
+      // if decryption result failed: display reason
+      errorDiv.textContent = (decResult.text in strings) ? (strings as any)[decResult.text] : decResult.text;
       // password hint div
       loginContainer.createDiv("password-hint").textContent = this.passwordHint;
       // password input div
@@ -136,12 +163,20 @@ export class MainEncryptBlock {
       const decryptButton = loginContainer.createEl("button", "decrypt-button");
       decryptButton.textContent = strings["decrypt-button"];
 
-
-      decryptButton.addEventListener("click", (e) => {
-        this.password = passwordInput.value;
+      function onDecryptButton(ref: any) {
+        ref.password = passwordInput.value;
         // Cause obsidian to re-render this block
         // unload on MarkdownRenderer unload
-        this.updateAllViews();
+        ref.updateAllViews();
+      }
+
+
+      decryptButton.addEventListener("click", (e) => {
+        onDecryptButton(this)
+      })
+
+      passwordInput.addEventListener("keydown", (e: KeyboardEvent) => {
+        if (e.key === "Enter") onDecryptButton(this);
       })
 
     }
@@ -150,29 +185,33 @@ export class MainEncryptBlock {
   updateAllViews() {
     for (let docId in this.updateEventRegister) {
       const renderInfo = this.updateEventRegister[docId];
-      // first clear all previous content
-      renderInfo.container.innerHTML = "";
       // then re-render this block
       this.renderBlock(renderInfo);
     }
   }
 }
 
-interface RenderInformation {
+
+export interface RenderInformation {
+  source: string;
   container: HTMLElement;
-  isSourceMode: boolean;
+  viewMode: ViewMode;
   ctx: MarkdownPostProcessorContext;
-  editor: Editor;
-  markdownView: MarkdownView;
+  view: View;
+  /*editor: Editor;
+  markdownView: MarkdownView;*/
 }
 
 let encryptBlockRegister: any = {}
 
 export function encryptBlockProcessor(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
+  // get blockID
   const blockID = source.split('\n')[0];
+  // register block if it doesn't exist
   if (!(blockID in encryptBlockRegister)) {
     encryptBlockRegister[blockID] = new MainEncryptBlock(blockID);
   }
+  // call .process of registered block
   encryptBlockRegister[blockID].process(...arguments)
 }
 

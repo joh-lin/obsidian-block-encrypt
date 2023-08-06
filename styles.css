@@ -1,6 +1,6 @@
 /* class structure:
 
-jojo-encrypt-container
+block-encrypt-container
   login-container
     error-text
     password-hint
@@ -13,7 +13,7 @@ jojo-encrypt-container
   save-button
     svg
 
-jojo-generator-container
+block-generator-container
   password-input
     div
     input
@@ -31,14 +31,22 @@ jojo-generator-container
   
 */
 
+.debug-tag-corner {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  /*display: none;*/
+}
+
 /* Encrypt Block Main */
-.jojo-encrypt-container {
+.block-encrypt-container {
   border: var(--border-width) solid var(--background-secondary-alt);
   border-radius: var(--radius-s);
   padding: var(--size-4-1);
+  position: relative;
 }
 
-.jojo-encrypt-container button.save-button {
+.block-encrypt-container button.save-button {
   position: absolute;
   bottom: var(--size-4-1);
   right: var(--size-4-1);
@@ -48,16 +56,16 @@ jojo-generator-container
   background-color: var(--interactive-normal);
 }
 
-.jojo-encrypt-container button.save-button.unsaved-changes {
+.block-encrypt-container button.save-button.unsaved-changes {
   color: var(--color-red);
 }
 
-.jojo-encrypt-container button.save-button:hover {
+.block-encrypt-container button.save-button:hover {
   background-color: var(--interactive-accent);
   color: var(--text-normal);
 }
 
-.jojo-encrypt-container textarea {
+.block-encrypt-container textarea {
   resize: none;
   width: 100%;
   padding: 0px;
@@ -71,30 +79,30 @@ jojo-generator-container
   font-size: var(--font-text-size);
 }
 
-.jojo-encrypt-container textarea:focus {
+.block-encrypt-container textarea:focus {
   border: none;
   outline: none;
   box-shadow: none;
 }
 
-.jojo-encrypt-container .login-container {
+.block-encrypt-container .login-container {
   padding: 0px;
   margin: 0px;
 }
 
 /* Login Block Main */
-.jojo-encrypt-container .login-container .error-text {
+.block-encrypt-container .login-container .error-text {
   color: var(--text-error);
   margin: var(--size-4-1) var(--size-4-1);
 }
 
-.jojo-encrypt-container .login-container .password-hint {
+.block-encrypt-container .login-container .password-hint {
   background-color: var(--background-primary-alt);
   border-radius: var(--radius-s);
   padding: var(--size-4-1) var(--size-4-1);
 }
 
-.jojo-encrypt-container .login-container .password-input {
+.block-encrypt-container .login-container .password-input {
   margin: 0px var(--size-4-1);
   display: flex;
   flex-wrap: wrap;
@@ -102,42 +110,48 @@ jojo-generator-container
   gap: var(--size-4-1) var(--size-4-2);
 }
 
-.jojo-encrypt-container .login-container .password-input input {
+.block-encrypt-container .login-container .password-input input {
   margin: var(--size-4-1) 0px;
   height: calc(var(--font-text-size) * 1.9);
 }
 
-.jojo-encrypt-container .login-container .password-input div {
+.block-encrypt-container .login-container .password-input div {
   width: calc(var(--font-text-size) * 10);
 }
 
-.jojo-encrypt-container .login-container .decrypt-button {
+.block-encrypt-container .login-container .decrypt-button {
   margin: var(--size-4-1) var(--size-4-1);
   font-size: var(--font-text-size);
   height: calc(var(--font-text-size) * 1.7);
   width: calc(var(--font-text-size) * 5.5);
 }
 
+.block-encrypt-container .invisible-workaround-text {
+  visibility: hidden;
+  position: absolute;
+  font-size: var(--font-text-size);
+}
+
 
 /* Generator Block */
-.jojo-generator-container .read-mode-title {
+.block-generator-container .read-mode-title {
   font-size: var(--h4-size);
   width: 100%;
   text-align: center;
 }
 
-.jojo-generator-container .read-mode-div {
+.block-generator-container .read-mode-div {
   width: 100%;
   text-align: center;
 }
 
-.jojo-generator-container {
+.block-generator-container {
   border: var(--border-width) solid var(--background-secondary-alt);
   border-radius: var(--radius-s);
   padding: var(--size-4-1);
 }
 
-.jojo-generator-container .password-input {
+.block-generator-container .password-input {
   margin: var(--size-4-1) var(--size-4-1);
   display: flex;
   flex-wrap: wrap;
@@ -145,15 +159,15 @@ jojo-generator-container
   gap: var(--size-4-1) var(--size-4-2);
 }
 
-.jojo-generator-container .password-input div {
+.block-generator-container .password-input div {
   width: calc(var(--font-text-size) * 10);
 }
 
-.jojo-generator-container .password-input input {
+.block-generator-container .password-input input {
   height: calc(var(--font-text-size) * 1.9);
 }
 
-.jojo-generator-container .hint-input {
+.block-generator-container .hint-input {
   margin: var(--size-4-1) var(--size-4-1);
   display: flex;
   flex-wrap: wrap;
@@ -161,20 +175,20 @@ jojo-generator-container
   gap: var(--size-4-1) var(--size-4-2);
 }
 
-.jojo-generator-container .hint-input div {
+.block-generator-container .hint-input div {
   width: calc(var(--font-text-size) * 10);
 }
 
-.jojo-generator-container .hint-input input {
+.block-generator-container .hint-input input {
   height: calc(var(--font-text-size) * 1.9);
 }
 
-.jojo-generator-container .error-text {
+.block-generator-container .error-text {
   margin: var(--size-4-1) var(--size-4-1);
   color: var(--text-error);
 }
 
-.jojo-generator-container .generate-button {
+.block-generator-container .generate-button {
   margin: var(--size-4-1) var(--size-4-1);
   background-color: var(--interactive-normal);
   font-size: var(--font-text-size);
@@ -191,7 +205,7 @@ jojo-generator-container
 
 
 /* MOBILE */
-.is-mobile .jojo-generator-container .hint-input input {
+.is-mobile .block-generator-container .hint-input input {
   width: auto;
   margin: 0px;
   padding: var(--size-4-1) var(--size-4-2);

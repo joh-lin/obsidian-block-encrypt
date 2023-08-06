@@ -1,6 +1,6 @@
 {
-	"id": "obsidian-jojos-encrypt",
-	"name": "Jojo's Encrypt Plugin",
+	"id": "obsidian-block-encrypt",
+	"name": "Block Encrypt",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Plugin that adds encrypted markdown code blocks.",

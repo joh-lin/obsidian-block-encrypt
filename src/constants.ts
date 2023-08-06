@@ -13,8 +13,8 @@ export const strings = {
   "passwords-not-matching": "Passwords not matching.",
   "please-enter-passwords": "Please enter passwords.",
   "new-encrypt-block-placeholder": "Enter text to be encrypted here.",
-  "generator-in-read-mode-title": "EncryptGenerator",
+  "generator-in-read-mode-title": "Encrypt Generator",
   "generator-in-read-mode-div": "(Switch to Edit Mode)",
   "error-password-empty": "Password empty.",
-  "error-incorrect-password": "Incorrect password."
+  "error-incorrect-password": "Incorrect password. Encryption Failed."
 }
