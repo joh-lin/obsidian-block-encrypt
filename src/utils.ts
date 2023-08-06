@@ -1,7 +1,6 @@
 import * as CryptoJS from "crypto-js";
 import { MarkdownView, View } from "obsidian";
 
-// TODO: make en/decryption more safe
 
 export function encryptText(source: string, password: string) {
   if (!password) throw "error-password-empty";

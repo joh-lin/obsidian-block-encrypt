@@ -4,19 +4,27 @@ import { ENCRYPT_BLOCK_IDENTIFIER, GENERATOR_BLOCK_IDENTIFIER } from './constant
 import { encryptBlockProcessor } from './mainEncryptBlock';
 import { determineViewMode } from './utils';
 
-export let blockEncryptPlugin: BlockEncryptPlugin;
-
 export default class BlockEncryptPlugin extends Plugin {
 
 	async onload() {
 
-		blockEncryptPlugin = this;
-
+		/* This block is the main encryption block. It features:
+		- Login View for entering a password
+		- A View/Editor View that allows for editing encrypted content if you
+		  are in source mode
+		*/
 		this.registerMarkdownCodeBlockProcessor(ENCRYPT_BLOCK_IDENTIFIER, encryptBlockProcessor)
 
+		/*
+		This block only works in source mode. It allows for the creation of encrypted block.
+		Here you specify a password and password hint.
+		*/
 		this.registerMarkdownCodeBlockProcessor(GENERATOR_BLOCK_IDENTIFIER, generatorBlockProcessor)
 
 
+		/*
+		This command spawns a generator block at cursor position.
+		*/
 		this.addCommand({
 			id: "insert-encryption-block",
 			name: "Insert encryption block",

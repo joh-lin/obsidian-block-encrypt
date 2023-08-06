@@ -12,7 +12,7 @@ export const strings = {
   "save-button": "SAVE",
   "passwords-not-matching": "Passwords not matching.",
   "please-enter-passwords": "Please enter passwords.",
-  "new-encrypt-block-placeholder": "Enter text to be encrypted here.",
+  "new-encrypt-block-placeholder": "[This text is encrypted.]",
   "generator-in-read-mode-title": "Encrypt Generator",
   "generator-in-read-mode-div": "(Switch to Edit Mode)",
   "error-password-empty": "Password empty.",
