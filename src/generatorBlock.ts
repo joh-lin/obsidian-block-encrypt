@@ -100,7 +100,7 @@ function renderBlock(info: RenderInformation) {
         const sectionInfo = info.ctx.getSectionInfo(info.container);
         if (sectionInfo) {
           editor.replaceRange(
-            markdownEncryptBlock(passwordInput1.value, hintInput.value, strings["new-encrypt-block-placeholder"]),
+            markdownEncryptBlock(passwordInput1.value, hintInput.value, ""), //, strings["new-encrypt-block-placeholder"]),
             {line: sectionInfo.lineStart, ch: 0},
             {line: sectionInfo.lineEnd, ch: editor.getLine(sectionInfo.lineEnd).length}
           );

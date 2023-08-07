@@ -1,8 +1,9 @@
 import { Editor, MarkdownView, Plugin, MarkdownPostProcessorContext, WorkspaceLeaf, View } from 'obsidian';
 import { generatorBlockProcessor, markdownGeneratorBlock } from './generatorBlock';
 import { ENCRYPT_BLOCK_IDENTIFIER, GENERATOR_BLOCK_IDENTIFIER } from './constants';
-import { encryptBlockProcessor } from './mainEncryptBlock';
+import { encryptBlockProcessor, markdownEncryptBlock } from './mainEncryptBlock';
 import { determineViewMode } from './utils';
+import { RequestPasswordModal } from './requestPasswordModal';
 
 export default class BlockEncryptPlugin extends Plugin {
 
@@ -32,6 +33,18 @@ export default class BlockEncryptPlugin extends Plugin {
 				editor.replaceRange(markdownGeneratorBlock(), editor.getCursor());
 				// set cursor after generator block
 				editor.setCursor({line: editor.getCursor().line+3, ch: 0});
+			}
+		})
+
+		this.addCommand({
+			id: "encrypt-selection",
+			name: "Encrypt selection",
+			editorCallback: (editor: Editor, ctx: MarkdownView) => {
+				const reqPassModal = new RequestPasswordModal(this.app, (newPassword: string, newHint: string) => {
+					editor.replaceSelection("\n"+markdownEncryptBlock(newPassword, newHint, editor.getSelection())+"\n");
+					reqPassModal.close();
+				});
+				reqPassModal.open();
 			}
 		})
 

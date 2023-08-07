@@ -1,7 +1,8 @@
 import { ENCRYPT_BLOCK_IDENTIFIER, strings } from "./constants";
 import { DecryptionResult, ViewMode, createInputField, decryptText, determineViewMode, encryptText, isMarkdownViewSoureMode } from "./utils";
-import { MarkdownPostProcessorContext, MarkdownView, Editor, setIcon, View } from "obsidian";
+import { MarkdownPostProcessorContext, MarkdownView, Editor, setIcon, View, Modal, App } from "obsidian";
 import { EditorView } from "@codemirror/view"
+import { RequestPasswordModal } from "./requestPasswordModal";
 
 export class MainEncryptBlock {
 
@@ -104,6 +105,7 @@ export class MainEncryptBlock {
       const mainTextArea = info.container.createEl("textarea", "main-text-area");
       mainTextArea.value = decResult.text;
       mainTextArea.disabled = info.viewMode !== "source";
+      mainTextArea.placeholder = strings["new-encrypt-block-placeholder"];
 
       // this text is used by the resizeObserver to detect font size change
       const invisText = info.container.createDiv("invisible-workaround-text");
@@ -128,6 +130,21 @@ export class MainEncryptBlock {
 
       // ^^^ bad (maybe)
 
+      
+
+      // buttons
+      const buttonContainer = info.container.createDiv("button-container");
+
+      // lock button 
+      const lockButton = buttonContainer.createEl("button", "lock-button");
+      setIcon(lockButton, "lock");
+      lockButton.title = strings["button-lock"]
+
+      lockButton.addEventListener("click", (e) => {
+        this.password = "";
+        this.updateAllViews()
+      })
+
 
       if (info.viewMode === "source") {
         /* If block is in source mode the main textarea is editable.
@@ -145,13 +162,18 @@ export class MainEncryptBlock {
         }
         const editor = markdownView.editor;
 
-        // save button
-        const saveButton = info.container.createEl("button", "save-button");
-        setIcon(saveButton, "save");
+        // change password button 
+        const changePasswordButton = buttonContainer.createEl("button", "change-password-button");
+        setIcon(changePasswordButton, "key");
+        changePasswordButton.title = strings["button-change-password"]
 
-        // encrypt and save text
-        saveButton.addEventListener("click", (e) => {
-          const newEncryptedText = encryptText(mainTextArea.value ?? "ERROR", this.password)
+        // save button
+        const saveButton = buttonContainer.createEl("button", "save-button");
+        setIcon(saveButton, "save");
+        saveButton.title = strings["button-save"]
+
+        function saveText(content: string, password: string, hint: string | null = null) {
+          const newEncryptedText = encryptText(content, password)
 
           const sectionInfo = info.ctx.getSectionInfo(info.container);
 
@@ -161,10 +183,33 @@ export class MainEncryptBlock {
               {line: sectionInfo.lineStart+3, ch: 0}, 
               {line: sectionInfo.lineStart+3, ch: editor.getLine(sectionInfo.lineStart+3).length})
 
+            if (hint) {
+              editor.replaceRange(`Hint: ${hint}`, 
+                {line: sectionInfo.lineStart+2, ch: 0}, 
+                {line: sectionInfo.lineStart+2, ch: editor.getLine(sectionInfo.lineStart+2).length})
+            }
+
           }
 
           // turn button normal color after save
           saveButton.classList.remove("unsaved-changes");
+        }
+
+
+        changePasswordButton.addEventListener("click", () => {
+          const reqPassModal = new RequestPasswordModal(app, (newPassword, newHint) => {
+            saveText(mainTextArea.value ?? "ERROR", newPassword, newHint);
+            this.password = newPassword;
+            this.updateAllViews();
+            reqPassModal.close();
+          });
+          reqPassModal.open();
+        })
+
+
+        // encrypt and save text
+        saveButton.addEventListener("click", (e) => {
+          saveText(mainTextArea.value ?? "ERROR", this.password);
         })
 
         // turns the save button red when there are unsaved changes
@@ -184,7 +229,9 @@ export class MainEncryptBlock {
       // if decryption result failed: display reason
       errorDiv.textContent = (decResult.text in strings) ? (strings as any)[decResult.text] : decResult.text;
       // password hint div
-      loginContainer.createDiv("password-hint").textContent = this.passwordHint;
+      const hintDisplay = createInputField(loginContainer, strings["hint"], "", "text", "off", "password-hint");
+      hintDisplay.disabled = true;
+      hintDisplay.value = this.passwordHint.substring(6);
       // password input div
       const passwordInput = createInputField(loginContainer, strings["enter-password"], strings["password-placeholder"], "password", "off", "password-input");
       //button
@@ -254,7 +301,7 @@ export function encryptBlockProcessor(source: string, container: HTMLElement, ct
 /*
 Provides a template that is inserted into doc by generator block
 */
-export function markdownEncryptBlock(passkey: string, passwordHint: string, content: string) : string {
+export function markdownEncryptBlock(passkey: string, passwordHint: string, content: string = "") : string {
   return `\`\`\`${ENCRYPT_BLOCK_IDENTIFIER}
 ${Date.now()}
 Hint: ${passwordHint}
