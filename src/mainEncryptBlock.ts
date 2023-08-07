@@ -67,7 +67,6 @@ export class MainEncryptBlock {
     If viewMode could not be determined, the window was probably not loaded yet
     so register mutationObserver to try again
     */
-   console.log(info.viewMode)
     if (info.viewMode === "undetermined") {
       new MutationObserver((mutations, observer) => {
         this.renderBlock(info);
@@ -144,7 +143,6 @@ export class MainEncryptBlock {
           }).observe(info.view.containerEl, {subtree: true, childList: true, attributes: true});
           return;
         }
-        console.log("yes markdown")
         const editor = markdownView.editor;
 
         // save button
