@@ -46,12 +46,13 @@ export function createInputField(parent: HTMLElement, lableText: string,
   placeholder: string, inputType: string = "text", 
   autocomplete: "off" | "on" = "off", htmlclass: string = "") {
     const group = parent.createDiv(htmlclass);
-    group.createDiv().textContent = lableText; // lable
+    const lable = group.createDiv(); // lable
+    lable.textContent = lableText;
     const input = group.createEl("input");
     input.type = inputType;
     input.autocomplete = autocomplete;
     input.placeholder = placeholder;
-    return input;
+    return {input:input, lable: lable};
 }
 
 /*

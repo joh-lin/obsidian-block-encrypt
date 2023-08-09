@@ -44,7 +44,7 @@ body {
 
 /* Encrypt Block Main */
 .block-encrypt-container {
-  border: var(--border-width) solid var(--background-secondary-alt);
+  border: var(--border-width) solid var(--background-modifier-border);
   border-radius: var(--radius-s);
   padding: var(--size-4-1);
   position: relative;
@@ -139,26 +139,22 @@ body {
 }
 
 /* Login Block Main */
-.block-encrypt-container .login-container .error-text {
-  color: var(--text-error);
-  margin: var(--size-4-1) var(--size-4-1);
-}
-
-.block-encrypt-container .login-container .password-input {
-  margin: 0px var(--size-4-1);
+.block-encrypt-container .login-container {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--size-4-1) var(--size-4-2);
 }
 
-.block-encrypt-container .login-container .password-input input {
-  margin: var(--size-4-1) 0px;
-  height: calc(var(--font-text-size) * 1.9);
+.block-encrypt-container .login-container .div1 {
+  width: fit-content;
 }
 
-.block-encrypt-container .login-container .password-input div {
-  width: var(--text-box-lable-width);
+.block-encrypt-container .login-container .div2 {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex-grow: 1;
 }
 
 .block-encrypt-container .login-container .password-hint {
@@ -172,17 +168,47 @@ body {
 .block-encrypt-container .login-container .password-hint input {
   margin: var(--size-4-1) 0px;
   height: calc(var(--font-text-size) * 1.9);
+  background-color: var(--background-secondary);
 }
 
 .block-encrypt-container .login-container .password-hint div {
   width: var(--text-box-lable-width);
 }
 
+.block-encrypt-container .login-container .password-input {
+  margin: 0px var(--size-4-1);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--size-4-1) var(--size-4-2);
+}
+
+.block-encrypt-container .login-container .password-input input {
+  margin: var(--size-4-1) 0px;
+  height: calc(var(--font-text-size) * 1.9);
+  background-color: var(--background-secondary);
+}
+
+.block-encrypt-container .login-container .password-input div {
+  width: var(--text-box-lable-width);
+}
+
+
+.block-encrypt-container .login-container .error-text {
+  color: var(--text-error);
+  margin: var(--size-4-1) var(--size-4-1);
+  height: calc(var(--font-text-size) * 1.9);
+  line-height: calc(var(--font-text-size) * 2);
+}
+
 .block-encrypt-container .login-container .decrypt-button {
   margin: var(--size-4-1) var(--size-4-1);
   font-size: var(--font-text-size);
-  height: calc(var(--font-text-size) * 1.7);
-  width: calc(var(--font-text-size) * 5.5);
+  height: calc(var(--font-text-size) * 1.9);
+  width: calc(var(--font-text-size) * 1.9);
+  align-self: flex-end;
+  padding: var(--size-4-1);
+  background-color: var(--background-secondary);
 }
 
 .block-encrypt-container .invisible-workaround-text {
@@ -205,7 +231,7 @@ body {
 }
 
 .block-generator-container {
-  border: var(--border-width) solid var(--background-secondary-alt);
+  border: var(--border-width) solid var(--background-modifier-border);
   border-radius: var(--radius-s);
   padding: var(--size-4-1);
 }
@@ -224,6 +250,7 @@ body {
 
 .block-generator-container .password-input input {
   height: calc(var(--font-text-size) * 1.9);
+  background-color: var(--background-secondary);
 }
 
 .block-generator-container .hint-input {
@@ -240,6 +267,7 @@ body {
 
 .block-generator-container .hint-input input {
   height: calc(var(--font-text-size) * 1.9);
+  background-color: var(--background-secondary);
 }
 
 .block-generator-container .error-text {
@@ -249,7 +277,7 @@ body {
 
 .block-generator-container .generate-button {
   margin: var(--size-4-1) var(--size-4-1);
-  background-color: var(--interactive-normal);
+  background-color: var(--background-secondary);
   font-size: var(--font-text-size);
   height: calc(var(--font-text-size) * 1.7);
   width: calc(var(--font-text-size) * 6);
@@ -265,6 +293,12 @@ body {
 
 /* MOBILE */
 .is-mobile .block-generator-container .hint-input input {
+  width: auto;
+  margin: 0px;
+  padding: var(--size-4-1) var(--size-4-2);
+}
+
+.is-mobile .block-encrypt-container .login-container .password-hint input {
   width: auto;
   margin: 0px;
   padding: var(--size-4-1) var(--size-4-2);

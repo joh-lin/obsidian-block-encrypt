@@ -140,11 +140,6 @@ export class MainEncryptBlock {
       setIcon(lockButton, "lock");
       lockButton.title = strings["button-lock"]
 
-      lockButton.addEventListener("click", (e) => {
-        this.password = "";
-        this.updateAllViews()
-      })
-
 
       if (info.viewMode === "source") {
         /* If block is in source mode the main textarea is editable.
@@ -195,6 +190,12 @@ export class MainEncryptBlock {
           saveButton.classList.remove("unsaved-changes");
         }
 
+        // lock button with save
+        lockButton.addEventListener("click", (e) => {
+          saveText(mainTextArea.value ?? "ERROR", this.password);
+          this.password = "";
+          this.updateAllViews()
+        })
 
         changePasswordButton.addEventListener("click", () => {
           const reqPassModal = new RequestPasswordModal(app, (newPassword, newHint) => {
@@ -216,7 +217,15 @@ export class MainEncryptBlock {
         mainTextArea.addEventListener("input", (e) => {
           saveButton.classList.add("unsaved-changes");
         })
+      } else { // Not source mode
+        // lock button without save
+        lockButton.addEventListener("click", (e) => {
+          this.password = "";
+          this.updateAllViews()
+        })
       }
+
+      
 
 
     } else {
@@ -224,19 +233,24 @@ export class MainEncryptBlock {
       // LOGIN WINDOW
 
       const loginContainer = info.container.createDiv("login-container");
-      // error display div
-      const errorDiv = loginContainer.createDiv("error-text");
-      // if decryption result failed: display reason
-      errorDiv.textContent = (decResult.text in strings) ? (strings as any)[decResult.text] : decResult.text;
+      const div1 = loginContainer.createDiv("div1");
+      const div2 = loginContainer.createDiv("div2");
+
       // password hint div
-      const hintDisplay = createInputField(loginContainer, strings["hint"], "", "text", "off", "password-hint");
+      const {input: hintDisplay} = createInputField(div1, strings["hint"], "", "text", "off", "password-hint");
       hintDisplay.disabled = true;
       hintDisplay.value = this.passwordHint.substring(6);
       // password input div
-      const passwordInput = createInputField(loginContainer, strings["enter-password"], strings["password-placeholder"], "password", "off", "password-input");
+      const {input:passwordInput} = createInputField(div1, strings["enter-password"], strings["password-placeholder"], "password", "off", "password-input");
+      
+      // error display div
+      const errorDiv = div2.createDiv("error-text");
+      // if decryption result failed: display reason
+      errorDiv.textContent = (decResult.text in strings) ? (strings as any)[decResult.text] : decResult.text;
       //button
-      const decryptButton = loginContainer.createEl("button", "decrypt-button");
-      decryptButton.textContent = strings["decrypt-button"];
+      const decryptButton = div2.createEl("button", "decrypt-button");
+      //decryptButton.textContent = strings["decrypt-button"];
+      setIcon(decryptButton, "key");
 
       function onDecryptButton(ref: any) {
         ref.password = passwordInput.value;
@@ -283,6 +297,14 @@ export interface RenderInformation {
 
 let encryptBlockRegister: any = {}
 
+function getBlockOfBlockID(blockID: string): MainEncryptBlock {
+  // register block if it doesn't exist
+  if (!(blockID in encryptBlockRegister)) {
+    encryptBlockRegister[blockID] = new MainEncryptBlock(blockID);
+  }
+  return encryptBlockRegister[blockID];
+}
+
 /*
 This function gives each block of encrypted text an instance of MainEncryptBlock, 
 which for example stores the password
@@ -290,20 +312,20 @@ which for example stores the password
 export function encryptBlockProcessor(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
   // get blockID
   const blockID = source.split('\n')[0];
-  // register block if it doesn't exist
-  if (!(blockID in encryptBlockRegister)) {
-    encryptBlockRegister[blockID] = new MainEncryptBlock(blockID);
-  }
   // call .process of registered block
-  encryptBlockRegister[blockID].process(...arguments)
+  getBlockOfBlockID(blockID).process(source, container, ctx);
+}
+
+export function setPasswordForBlockID(blockID: string, password: string) {
+  getBlockOfBlockID(blockID).password = password;
 }
 
 /*
 Provides a template that is inserted into doc by generator block
 */
-export function markdownEncryptBlock(passkey: string, passwordHint: string, content: string = "") : string {
+export function markdownEncryptBlock(passkey: string, passwordHint: string, blockID: string = Date.now().toString(), content: string = "") : string {
   return `\`\`\`${ENCRYPT_BLOCK_IDENTIFIER}
-${Date.now()}
+${blockID}
 Hint: ${passwordHint}
 ${encryptText(content, passkey)}
 \`\`\``

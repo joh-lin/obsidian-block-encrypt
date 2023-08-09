@@ -1,7 +1,7 @@
 import { MarkdownPostProcessorContext, MarkdownView } from "obsidian";
 import { GENERATOR_BLOCK_IDENTIFIER, strings } from "./constants";
 import { isMarkdownViewSoureMode, createInputField, determineViewMode } from "./utils";
-import { RenderInformation, markdownEncryptBlock } from "./mainEncryptBlock";
+import { RenderInformation, markdownEncryptBlock, setPasswordForBlockID } from "./mainEncryptBlock";
 
 export function generatorBlockProcessor(source: string, container: HTMLElement, ctx: MarkdownPostProcessorContext) {
   /*
@@ -81,9 +81,11 @@ function renderBlock(info: RenderInformation) {
     const editor = markdownView.editor;
 
     // create html elements
-    const passwordInput1 = createInputField(info.container, strings["enter-password"], strings["password-placeholder"], "password", "off", "password-input");
-    const passwordInput2 = createInputField(info.container, strings["repeat-password"], strings["password-placeholder"], "password", "off", "password-input");
-    const hintInput = createInputField(info.container, strings["enter-password-hint"], strings["hint-placeholder"], "text", "on", "hint-input");
+
+    // inputs
+    const {input:passwordInput1} = createInputField(info.container, strings["enter-password"], strings["password-placeholder"], "password", "off", "password-input");
+    const {input:passwordInput2} = createInputField(info.container, strings["repeat-password"], strings["password-placeholder"], "password", "off", "password-input");
+    const {input:hintInput} = createInputField(info.container, strings["enter-password-hint"], strings["hint-placeholder"], "text", "on", "hint-input");
     const errorDiv = info.container.createDiv("error-text");
     const generateButton = info.container.createEl("button", "generate-button");
     generateButton.textContent = strings["generate-button"];
@@ -99,11 +101,14 @@ function renderBlock(info: RenderInformation) {
       else {
         const sectionInfo = info.ctx.getSectionInfo(info.container);
         if (sectionInfo) {
+          const newBlockId = Date.now().toString();
+          const password = passwordInput1.value;
           editor.replaceRange(
-            markdownEncryptBlock(passwordInput1.value, hintInput.value, ""), //, strings["new-encrypt-block-placeholder"]),
+            markdownEncryptBlock(password, hintInput.value, newBlockId, ""), //, strings["new-encrypt-block-placeholder"]),
             {line: sectionInfo.lineStart, ch: 0},
             {line: sectionInfo.lineEnd, ch: editor.getLine(sectionInfo.lineEnd).length}
           );
+          setPasswordForBlockID(newBlockId, password)
         }
       }
     });
